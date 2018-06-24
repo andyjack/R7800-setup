@@ -109,6 +109,10 @@ For both radios:
 * "Interface Configuration -> Wireless Security" tab:
   * Encryption: WPA2-PSK; Cipher is "auto"; key is a secret!
 
+See also [the OpenWRT
+doc](https://openwrt.org/docs/guide-quick-start/walkthrough_wifi) on wifi
+setup.
+
 ## Securing LuCI
 
 The web UI for managing the R7800 runs via http only, so it's rather insecure.
