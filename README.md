@@ -72,6 +72,14 @@ After saving these changes, the R7800 is now on a different IP and network.
 You'll need to reconfigure your laptop's network to be able to connect to the
 R7800.
 
+The Dumb AP document specifies that you have to disable multicast snooping,
+but in the 17.01.4 firmware out-of-the-box already has this set to `0`.
+
+```
+root@LEDE:~# cat /sys/devices/virtual/net/br-lan/bridge/multicast_snooping
+0
+```
+
 ### Firewall
 
 Disable the firewall so it doesn't run.
