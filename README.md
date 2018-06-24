@@ -1,5 +1,10 @@
 # Setting up Netgear R7800 (Nighthawk X4S) with OpenWRT
 
+## Product Pages
+
+* https://www.netgear.com/support/product/R7800
+* https://kb.netgear.com/30180/R7800-FAQs
+
 ## Connections
 
 1. Connect to laptop with ethernet - use internal lan port
