@@ -30,10 +30,33 @@ secure/complex password isn't really necessary.
 If you are looking for newer releases of the firmware to upgrade, the target
 arch is `ipq806x/generic`.  The release I used was:
 
-http://downloads.lede-project.org/releases/17.01.4/targets/ipq806x/generic/
+http://downloads.openwrt.org/releases/18.06.1/targets/ipq806x/generic/
 
 And I downloaded the `R7800-squashfs-factory.img` file.  Look at the
 Supplementary Files section at the bottom for sha256 sums.
+
+## Sysupgrade.bin and TFTP recovery
+
+After two months of running the OpenWRT firmware, I tried using the [upgrade
+instructions](https://openwrt.org/docs/guide-quick-start/sysupgrade.luci) to
+upgrade from 17.04 to 18.06. However I ran into the power led blinking after
+the reboot. 192.168.1.1 was pingable but the LEDE web UI would not load. It
+was like that for several minutes. It turned out this was a recovery state of
+the router due to a [failed firmware
+upgrade](https://kb.netgear.com/000059633/How-to-upload-firmware-to-a-NETGEAR-router-using-TFTP-client).
+By running a [TFTP
+upload](http://www.i-helpdesk.com.au/index.php?/Knowledgebase/Article/View/559/0/uploading-firmware-using-mac-osxunix-via-tftp)
+with the `-squashfs-factory.img` file, it was possible to get the router
+functional again.
+
+```
+$ tftp 192.168.1.1
+tftp> binary
+tftp> put openwrt.img
+Sent 8257665 bytes in 1.6 seconds
+```
+
+The router immediately rebooted after the TFTP upload was done.
 
 ## Setup
 
@@ -74,24 +97,32 @@ that part of the article.
     * NDP-Proxy
 
 After saving these changes, the R7800 is now on a different IP and network.
-You'll need to reconfigure your laptop's network to be able to connect to the
-R7800.
+However as of the 18.06 version it will try to confirm the changes after
+waiting 30 seconds in the browser. This will fail since the UI is listening on
+the new IP, so it will revert to the old IP and display a message to retry the
+changes.  Use the "Apply Unchecked config" option to re-do the changes so they
+don't revert.
+
+When the interface IP is updated, you'll need to reconfigure your laptop's
+network to be able to connect to the R7800.
 
 The Dumb AP document specifies that you have to disable multicast snooping,
-but in the 17.01.4 firmware out-of-the-box already has this set to `0`.
+but in the 18.06.1 firmware out-of-the-box already has this set to `0`.
 
 ```
 root@LEDE:~# cat /sys/devices/virtual/net/br-lan/bridge/multicast_snooping
 0
 ```
 
-### Firewall
+### Firewall and dnsmasq
 
-Disable the firewall so it doesn't run.
+Disable these services so they don't run.
 
 1. "System -> Startup"
-1. Click the "Enabled" button so it shows "Disabled".
-1. Click "Submit" at the bottom of the page.
+1. For each of `firewall` and `dnsmasq` in the listing:
+  * Click the "Enabled" button so it shows "Disabled"
+  * Click the "Stop" button to stop the running instance of the service
+  * Click "Submit" at the bottom of the page
 
 ### Wireless setup
 
@@ -108,6 +139,7 @@ For both radios:
   * Set up the ESSID; Mode is "Access Point"
 * "Interface Configuration -> Wireless Security" tab:
   * Encryption: WPA2-PSK; Cipher is "auto"; key is a secret!
+  * Enable KRACK protection on session auto-renegotiation
 
 See also [the OpenWRT
 doc](https://openwrt.org/docs/guide-quick-start/walkthrough_wifi) on wifi
@@ -151,10 +183,24 @@ More information on configuring `uhttpd` is
 configuration you worked so hard on.  Once you're done setting up the R7800
 creating a backup of this configuration would be helpful for future upgrades.
 
+However the sysupgrade documentation says that it's probably a good idea to
+start over again from defaults for new major releases, so saving the backups
+might only be useful for reference.
+
 ## Final Setup
 
 Replace the old wireless router with the R7800.  Before disconnecting the old
 router, change the SSID and password to some nonsense values.
+
+## System Info
+
+| | |
+|---|---|
+| Hostname | OpenWrt |
+| Model | Netgear Nighthawk X4S R7800 |
+| Architecture | ARMv7 Processor rev 0 (v7l) |
+| Firmware Version | OpenWrt 18.06.1 r7258-5eb055306f / LuCI openwrt-18.06 branch (git-18.228.31946-f64b152) |
+| Kernel Version | 4.14.63 |
 
 <!--
  vim:tw=78
