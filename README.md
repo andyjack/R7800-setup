@@ -58,6 +58,46 @@ Sent 8257665 bytes in 1.6 seconds
 
 The router immediately rebooted after the TFTP upload was done.
 
+### Upgrading from 18.06.1 to 18.06.2
+
+Attempting to use the `-squashfs-sysupgrade.bin` here:
+
+http://downloads.openwrt.org/releases/18.06.2/targets/ipq806x/generic/
+
+Verified the integrity of the downloaded firmware with gpg.  First downloaded
+a backup of the settings on the **System** -> **Backup / Flash Firmware**
+page.
+
+Then uploaded the upgrade firmware.  I checked off the "Keep settings" box,
+assuming that since we're only doing a minor revision bump, the settings
+should be compatible across versions.
+
+During the process - the power LED went to solid orange, then white blinking,
+then solid white.  Success!
+
+Pinging the router during the upgrade process let me know it came back on the
+same IP.  However I couldn't log in with https, I had to use
+`http://<router_ip>` to use the web UI.  **BUT** logging in wouldn't work?
+
+I could log in via `ssh` though - after doing so I went through the process
+for installing openssl support of the web UI:
+
+```
+opkg update
+opkg install luci-ssl-openssl
+/etc/init.d/uhttpd restart
+```
+
+Then I was able to use `https://<router_ip>` to log in.
+
+Because I was using the root password (unsuccessfully) on a web form thru an
+insecure http connection, I changed the root pw to a new one with the `passwd`
+command.
+
+I did have to go over to "System -> Startup" and disable `dnsmasq` and
+`firewall` again. Other customizations in this doc appeared to have survived
+the upgrade.
+
 ## Setup
 
 I have a different box connected to the internet, so I just want a "dumb AP"
@@ -199,8 +239,8 @@ router, change the SSID and password to some nonsense values.
 | Hostname | OpenWrt |
 | Model | Netgear Nighthawk X4S R7800 |
 | Architecture | ARMv7 Processor rev 0 (v7l) |
-| Firmware Version | OpenWrt 18.06.1 r7258-5eb055306f / LuCI openwrt-18.06 branch (git-18.228.31946-f64b152) |
-| Kernel Version | 4.14.63 |
+| Firmware Version | OpenWrt 18.06.2 r7676-cddd7b4c77 / LuCI openwrt-18.06 branch (git-19.020.41695-6f6641d) |
+| Kernel Version | 4.14.95 |
 
 <!--
  vim:tw=78
